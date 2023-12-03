@@ -1,4 +1,5 @@
 package com.csc330.scribble;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -7,6 +8,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.effect.GaussianBlur;
+import javafx.scene.Cursor;
+import javafx.scene.ImageCursor;
+import javafx.scene.image.Image;
 
 public class Scribble extends Application {
 
@@ -16,7 +20,7 @@ public class Scribble extends Application {
     @Override
     public void start(Stage primaryStage) {
         Pane root = new Pane();
-        canvas = new Canvas(800, 600); // Initialize the canvas with initial size
+        canvas = new Canvas(800, 600); // Initialize the canvas with the initial size
 
         // Bind the width and height of the canvas to the width and height of the pane
         canvas.widthProperty().bind(root.widthProperty());
@@ -25,8 +29,16 @@ public class Scribble extends Application {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         setupDrawing(gc);
 
+        // Load the cursor image using the correct path
+        Image cursorImage = new Image(getClass().getResourceAsStream("/chalk.png"));
+
+        Cursor cursor = new ImageCursor(cursorImage);
+
+        // Set the custom cursor for the canvas
+        canvas.setCursor(cursor);
+
         root.getChildren().add(canvas);
-        Scene scene = new Scene(root, 800, 600, Color.rgb(20,20,20)); // Initial size of the scene
+        Scene scene = new Scene(root, 800, 600, Color.rgb(20, 20, 20)); // Initial size of the scene
 
         primaryStage.setTitle("Scribble");
         primaryStage.setScene(scene);
