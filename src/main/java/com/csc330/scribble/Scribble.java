@@ -32,12 +32,11 @@ public class Scribble extends Application {
         primaryStage.show();
     }
 
-
     private void setupDrawing(GraphicsContext gc) {
-        double radius = 5; // Circle radius
-        gc.setFill(Color.WHITE); // Use setFill for the color of the circles
+        double size = 10; // Square size
+        gc.setFill(Color.WHITE); // Use setFill for the color of the squares and circles
         gc.setStroke(Color.WHITE); // Set the same color for the stroke
-        gc.setLineWidth(radius * 2); // Set the line width to match the circle's diameter
+        gc.setLineWidth(size); // Set the line width to match the square's size
 
         final double[] lastX = {0}; // Array to hold the last position
         final double[] lastY = {0}; // Using array to allow modification in lambda
@@ -45,26 +44,43 @@ public class Scribble extends Application {
         canvas.setOnMousePressed(e -> {
             lastX[0] = e.getX();
             lastY[0] = e.getY();
-            drawCircle(gc, lastX[0], lastY[0], radius);
+            drawCircle(gc, lastX[0], lastY[0], size / 2); // Draw circle at the click position
         });
 
         canvas.setOnMouseDragged(e -> {
-            drawCircle(gc, e.getX(), e.getY(), radius);
-
-            // Draw a line from the last position to the current position
-            gc.strokeLine(lastX[0], lastY[0], e.getX(), e.getY());
+            interpolateAndDrawLine(gc, lastX[0], lastY[0], e.getX(), e.getY(), size);
 
             lastX[0] = e.getX();
             lastY[0] = e.getY();
         });
+
+        // THIS IS NOT WORKING.....
+        canvas.setOnMouseReleased(e -> {
+            drawCircle(gc, e.getX(), e.getY(), size / 2); // Draw circle when the mouse is released
+        });
+    }
+
+    private void interpolateAndDrawLine(GraphicsContext gc, double lastX, double lastY, double currentX, double currentY, double radius) {
+        double distance = Math.sqrt(Math.pow(currentX - lastX, 2) + Math.pow(currentY - lastY, 2));
+        int steps = (int) distance;
+
+        for (int i = 0; i <= steps; i++) {
+            double t = i / (double) steps;
+            double interpolatedX = lastX + t * (currentX - lastX);
+            double interpolatedY = lastY + t * (currentY - lastY);
+
+            // Draw a circle at each interpolated position
+            drawCircle(gc, interpolatedX, interpolatedY, radius/2);
+        }
+    }
+
+    private void drawSquare(GraphicsContext gc, double x, double y, double size) {
+        gc.fillRect(x - size / 2, y - size / 2, size, size);
     }
 
     private void drawCircle(GraphicsContext gc, double x, double y, double radius) {
         gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
     }
-
-
-
 
 
     public static void main(String[] args) {
