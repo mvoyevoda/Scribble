@@ -36,7 +36,7 @@ public class Scribble extends Application {
     private void setupDrawing(GraphicsContext gc) {
 
         GaussianBlur blur = new GaussianBlur();
-        blur.setRadius(2); // You can adjust the radius as needed
+        blur.setRadius(1.5); // You can adjust the radius as needed
         gc.setEffect(blur);
 
         double circleDiameter = 6; // Diameter of the circles
@@ -61,22 +61,22 @@ public class Scribble extends Application {
     }
 
     private void interpolateAndDrawCircles(GraphicsContext gc, double x1, double y1, double x2, double y2, double diameter, Color color) {
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-        double distance = Math.sqrt(dx * dx + dy * dy);
+        double cx1 = x1 + (x2 - x1) / 3.0; // Control point 1 x-coordinate
+        double cy1 = y1 + (y2 - y1) / 3.0; // Control point 1 y-coordinate
+        double cx2 = x1 + 2 * (x2 - x1) / 3.0; // Control point 2 x-coordinate
+        double cy2 = y1 + 2 * (y2 - y1) / 3.0; // Control point 2 y-coordinate
 
-        // Significantly increase the number of steps
-        // The multiplier is set to a higher value to achieve higher smoothness
-        int steps = Math.max((int) (distance * 4), 40);  // Increase the multiplier as needed
+        int steps = 40; // Number of steps for interpolation
 
         gc.setFill(color); // Set the color for the circles
 
         for (int i = 0; i <= steps; i++) {
             double t = i / (double) steps;
-            double interpolatedX = x1 + t * dx;
-            double interpolatedY = y1 + t * dy;
+            double tInv = 1 - t;
+            double x = x1 * Math.pow(tInv, 3) + 3 * cx1 * t * Math.pow(tInv, 2) + 3 * cx2 * Math.pow(t, 2) * tInv + x2 * Math.pow(t, 3);
+            double y = y1 * Math.pow(tInv, 3) + 3 * cy1 * t * Math.pow(tInv, 2) + 3 * cy2 * Math.pow(t, 2) * tInv + y2 * Math.pow(t, 3);
 
-            drawCircle(gc, interpolatedX, interpolatedY, diameter / 2, color);
+            drawCircle(gc, x, y, diameter / 2, color);
         }
     }
 
