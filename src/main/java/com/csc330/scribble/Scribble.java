@@ -6,6 +6,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.scene.transform.Rotate;
 
 public class Scribble extends Application {
 
@@ -33,55 +34,69 @@ public class Scribble extends Application {
     }
 
     private void setupDrawing(GraphicsContext gc) {
-        double size = 10; // Square size
-        gc.setFill(Color.WHITE); // Use setFill for the color of the squares and circles
-        gc.setStroke(Color.WHITE); // Set the same color for the stroke
-        gc.setLineWidth(size); // Set the line width to match the square's size
+        double lineWidth = 0.5; // Width of the line
+        double lineLength = 10; // Length of the line, also the diameter of the circles
+        Color lineColor = Color.WHITE; // Color of the line
 
-        final double[] lastX = {0}; // Array to hold the last position
-        final double[] lastY = {0}; // Using array to allow modification in lambda
+        final double[] lastX = {0};
+        final double[] lastY = {0};
 
         canvas.setOnMousePressed(e -> {
             lastX[0] = e.getX();
             lastY[0] = e.getY();
-            drawCircle(gc, lastX[0], lastY[0], size / 2); // Draw circle at the click position
+            drawCircle(gc, lastX[0], lastY[0], lineLength / 2, lineColor); // Draw an initial circle at the press point
         });
 
         canvas.setOnMouseDragged(e -> {
-            interpolateAndDrawLine(gc, lastX[0], lastY[0], e.getX(), e.getY(), size);
-
+            interpolateAndDrawRectangles(gc, lastX[0], lastY[0], e.getX(), e.getY(), lineWidth, lineLength, lineColor);
             lastX[0] = e.getX();
             lastY[0] = e.getY();
         });
 
-        // THIS IS NOT WORKING.....
-        canvas.setOnMouseReleased(e -> {
-            drawCircle(gc, e.getX(), e.getY(), size / 2); // Draw circle when the mouse is released
-        });
+        // Optional: Handle mouse released if needed
     }
 
-    private void interpolateAndDrawLine(GraphicsContext gc, double lastX, double lastY, double currentX, double currentY, double radius) {
-        double distance = Math.sqrt(Math.pow(currentX - lastX, 2) + Math.pow(currentY - lastY, 2));
-        int steps = (int) distance;
+    private void interpolateAndDrawRectangles(GraphicsContext gc, double x1, double y1, double x2, double y2, double width, double length, Color color) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        double angle = Math.atan2(dy, dx);
+
+        // Significantly increase the number of steps for smoother lines
+        // You can adjust the multiplier (e.g., 4, 5, etc.) to see different levels of smoothness
+        int steps = Math.max((int) (distance * 20), 200);
+
+        gc.setFill(color); // Set the color for the rectangles
 
         for (int i = 0; i <= steps; i++) {
             double t = i / (double) steps;
-            double interpolatedX = lastX + t * (currentX - lastX);
-            double interpolatedY = lastY + t * (currentY - lastY);
+            double interpolatedX = x1 + t * dx;
+            double interpolatedY = y1 + t * dy;
 
-            // Draw a circle at each interpolated position
-            drawCircle(gc, interpolatedX, interpolatedY, radius/2);
+            drawRotatedRectangle(gc, interpolatedX, interpolatedY, angle, width, length, color);
         }
     }
 
-    private void drawSquare(GraphicsContext gc, double x, double y, double size) {
-        gc.fillRect(x - size / 2, y - size / 2, size, size);
+    private void drawRotatedRectangle(GraphicsContext gc, double x, double y, double angle, double width, double length, Color color) {
+        gc.save(); // Save the current state of the graphics context
+
+        // Translate and rotate the canvas context
+        gc.translate(x, y);
+        gc.rotate(Math.toDegrees(angle));
+
+        // Set the fill color for the rectangle
+        gc.setFill(color);
+
+        // Draw the rectangle centered at the current position
+        gc.fillRect(-width / 2, -length / 2, width, length);
+
+        gc.restore(); // Restore the graphics context to its original state
     }
 
-    private void drawCircle(GraphicsContext gc, double x, double y, double radius) {
+    private void drawCircle(GraphicsContext gc, double x, double y, double radius, Color color) {
+        gc.setFill(color);
         gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
     }
-
 
     public static void main(String[] args) {
         launch(args);
