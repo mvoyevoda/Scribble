@@ -1,4 +1,4 @@
-package csi.csc330.scribble.main;
+package csi.csc330.scribble;
 
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
