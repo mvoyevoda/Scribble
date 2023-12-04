@@ -6,6 +6,6 @@ module com.csc330.scribble {
     requires org.kordamp.ikonli.javafx;
     requires com.almasb.fxgl.all;
 
-    opens com.csc330.scribble to javafx.fxml;
-    exports com.csc330.scribble;
+    opens csi.csc330.scribble.main to javafx.fxml;
+    exports csi.csc330.scribble.main;
 }
