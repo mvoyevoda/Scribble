@@ -3,6 +3,7 @@ package csi.csc330.scribble.main;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -21,10 +22,12 @@ public class Controller {
     private MenuItem clearCanvasMenuItem;
     private GraphicsContext gc;
     private final Color[] strokeColors = new Color[]{Color.WHITE, Color.GREEN, Color.RED, Color.YELLOW, Color.BLUE, Color.ORANGE, Color.PURPLE, Color.GRAY, Color.MEDIUMPURPLE, Color.PINK, Color.BROWN};
-    private final double[] strokeThicknessOptions = {1.0, 3.0, 6.0}; // Add desired stroke thickness values
+    private final int[] strokeThicknessOptions = {3, 6, 8}; // Add desired stroke thickness values
     // STYLE PARAMETERS
-    private double selectedStrokeThickness = 1.0; // Default stroke thickness
-    private Color selectedColor = Color.WHITE; // Default Stroke color
+    private int selectedStrokeThickness = strokeThicknessOptions[0]; // Default stroke thickness
+    private Color selectedColor = Color.WHITE; // Default stroke color
+    Color backgroundColor = Color.web("#141414"); // Default background color
+    private boolean eraserMode = false;
 
     @FXML
     public void initialize() {
@@ -35,13 +38,15 @@ public class Controller {
         // Bind canvas size to border pane size
         canvas.widthProperty().bind(borderPane.widthProperty());
         canvas.heightProperty().bind(borderPane.heightProperty());
-
         clearCanvasMenuItem.setOnAction(e -> clearCanvas(gc));
+        eraserToggle.setOnAction(e -> {
+            eraserMode = eraserToggle.isSelected(); // Toggle eraser mode
+        });
     }
 
     private void clearCanvas(GraphicsContext gc) {
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        canvas.getParent().requestLayout(); // Force a layout pass
+        gc.setFill(backgroundColor);
+        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
     private void setupDrawing() {
@@ -49,21 +54,41 @@ public class Controller {
         blur.setRadius(2);
         gc.setEffect(blur);
 
-        double circleDiameter = 6;
+        double circleDiameter = selectedStrokeThickness*2;
         final double[] lastX = {0};
         final double[] lastY = {0};
 
         canvas.setOnMousePressed(e -> {
             lastX[0] = e.getX();
             lastY[0] = e.getY();
-            drawCircle(lastX[0], lastY[0], circleDiameter / 2, selectedColor);
+            if (eraserMode){
+                clearArea(e.getX(), e.getY());
+            } else {
+                drawCircle(lastX[0], lastY[0], circleDiameter / 2, selectedColor);
+            }
         });
 
         canvas.setOnMouseDragged(e -> {
-            interpolateAndDrawCircles(lastX[0], lastY[0], e.getX(), e.getY(), circleDiameter, selectedColor);
+            if (eraserMode) {
+                // Erase the area under the cursor
+                clearArea(e.getX(), e.getY());
+            } else {
+                // Existing drawing code
+                interpolateAndDrawCircles(lastX[0], lastY[0], e.getX(), e.getY(), circleDiameter, selectedColor);
+            }
             lastX[0] = e.getX();
             lastY[0] = e.getY();
         });
+    }
+
+    private void clearArea(double x, double y) {
+        double eraserDiameter = 50; // Diameter of the eraser
+        double radius = eraserDiameter / 2;
+
+        // Set the fill color to the background color of the canvas
+        gc.setFill(backgroundColor);
+        // Fill a circle with the background color to "erase"
+        gc.fillOval(x - radius, y - radius, eraserDiameter, eraserDiameter);
     }
 
     private void interpolateAndDrawCircles(double x1, double y1, double x2, double y2, double diameter, Color color) {
@@ -73,9 +98,9 @@ public class Controller {
 
         int steps = Math.max((int) (distance * 4), 40);
 
-        gc.setFill(color);
-        gc.setStroke(color);
-        gc.setLineWidth(selectedStrokeThickness);
+//        gc.setFill(color);
+//        gc.setStroke(color);
+//        gc.setLineWidth(selectedStrokeThickness);
 
         for (int i = 0; i <= steps; i++) {
             double t = i / (double) steps;
@@ -106,6 +131,9 @@ public class Controller {
     private Menu colorMenu;
     @FXML
     private Menu thicknessMenu;
+    @FXML
+    private CheckMenuItem eraserToggle;
+
 
     private void populateColorMenu() {
         for (Color color : strokeColors) {
@@ -123,7 +151,7 @@ public class Controller {
     }
 
     private void populateThicknessMenu() {
-        for (double thickness : strokeThicknessOptions) {
+        for (int thickness : strokeThicknessOptions) {
             MenuItem thicknessItem = new MenuItem(String.valueOf(thickness));
             thicknessItem.setOnAction(e -> {
                 selectedStrokeThickness = thickness;
