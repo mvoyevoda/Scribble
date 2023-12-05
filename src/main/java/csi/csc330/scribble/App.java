@@ -17,11 +17,11 @@ public class App extends Application {
         primaryStage.setTitle("Scribble");
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();
-        Image chalkCursorImage = new Image(getClass().getResourceAsStream("/chalk.png"));
-        Cursor chalkCursor = new ImageCursor(chalkCursorImage);
-        primaryStage.getScene().setCursor(chalkCursor);
-        Image icon = new Image(getClass().getResourceAsStream("/icon.png"));
-        primaryStage.getIcons().add(icon);
+//        Image chalkCursorImage = new Image(getClass().getResourceAsStream("/chalk.png"));
+//        Cursor chalkCursor = new ImageCursor(chalkCursorImage);
+//        primaryStage.getScene().setCursor(chalkCursor);
+//        Image icon = new Image(getClass().getResourceAsStream("/icon.png"));
+//        primaryStage.getIcons().add(icon);
     }
 
     public static void main(String[] args) {
