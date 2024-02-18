@@ -90,9 +90,7 @@ public class Controller {
             model.setLastY(currentY);
         });
 
-        eraserToggle.setOnAction(e -> {
-            eraserMode = eraserToggle.isSelected();
-        });
+        eraserToggle.setOnAction(e -> eraserMode = eraserToggle.isSelected());
 
     }
 
@@ -142,9 +140,7 @@ public class Controller {
             MenuItem thicknessItem = new MenuItem(String.valueOf(thickness));
             thicknessMenu.getItems().add(thicknessItem);
 
-            thicknessItem.setOnAction(e -> {
-                selectedStrokeThickness = thickness;
-            });
+            thicknessItem.setOnAction(e -> selectedStrokeThickness = thickness);
 
         }
     }
