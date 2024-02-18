@@ -26,8 +26,6 @@ public class Controller {
     @FXML
     private MenuItem clearCanvasMenuItem;
     @FXML
-    private MenuBar menuBar;
-    @FXML
     private Menu colorMenu;
     @FXML
     private Menu thicknessMenu;
